@@ -1,0 +1,384 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #8b5cf6; /* Vibrant Purple */
+  --primary-hover: #7c3aed;
+  --secondary: #ec4899; /* Pink accent */
+  --bg-white: #ffffff;
+  --text-dark: #0f172a;
+  --text-gray: #64748b;
+  --border-color: #e2e8f0;
+  --input-focus-ring: rgba(139, 92, 246, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-dark);
+  background-color: #f8fafc; /* Slightly off-white for depth */
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: var(--secondary);
+}
+
+/* Split Layout Container */
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Left Side - Form */
+.auth-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  background-color: var(--bg-white);
+  box-shadow: 20px 0 50px -20px rgba(0,0,0,0.05); /* Soft shadow overlapping right side */
+  z-index: 10;
+  justify-content: center;
+}
+
+.auth-form-wrapper {
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+  animation: slideRightFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.auth-logo svg {
+  color: url(#logo-gradient); /* Will work if we define SVG gradient inline, but for CSS we can just color it */
+  fill: url(#logo-gradient);
+  stroke: var(--primary);
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 4px 6px rgba(139, 92, 246, 0.3));
+}
+
+.auth-logo span {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--text-dark), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-label {
+  color: var(--secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.auth-heading {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+  color: var(--text-dark);
+}
+
+.auth-subheading {
+  color: var(--text-gray);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #334155;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  color: #94a3b8;
+  width: 20px;
+  height: 20px;
+  transition: color 0.3s;
+}
+
+.input-wrapper input, .input-wrapper select {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  background-color: #f8fafc;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  color: var(--text-dark);
+}
+
+.input-wrapper input:focus, .input-wrapper select:focus {
+  border-color: var(--primary);
+  background-color: var(--bg-white);
+  box-shadow: 0 0 0 4px var(--input-focus-ring);
+}
+
+.input-wrapper input:focus + .input-icon, 
+.input-wrapper input:focus ~ .input-icon {
+  color: var(--primary);
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-gray);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 16px -8px rgba(139, 92, 246, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+  transform: skewX(-20deg);
+  animation: shine 3s infinite;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px -10px rgba(236, 72, 153, 0.6);
+}
+
+.btn-primary:disabled {
+  background: #cbd5e1;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary:disabled::after {
+  display: none;
+}
+
+.auth-footer-text {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--text-gray);
+}
+
+.auth-secure-text {
+  margin-top: 30px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Right Side - Visual */
+.auth-right {
+  flex: 1.2; /* Slightly wider */
+  background-color: #0f172a; /* Deep slate */
+  background-image: 
+    radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.4) 0%, transparent 50%),
+    url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4='); /* subtle dot pattern */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: white;
+  position: relative;
+}
+
+.auth-right-content {
+  max-width: 500px;
+  position: relative;
+  z-index: 2;
+  animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.auth-right .auth-logo {
+  margin-bottom: 40px;
+}
+
+.auth-right .auth-logo svg {
+  stroke: #c4b5fd;
+  filter: drop-shadow(0 0 10px rgba(196, 181, 253, 0.5));
+}
+
+.auth-right .auth-logo span {
+  color: white;
+  background: none;
+  -webkit-text-fill-color: white;
+}
+
+.auth-right-heading {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+  background: linear-gradient(to right, #ffffff, #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-right-subheading {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin-bottom: 30px;
+  font-weight: 400;
+}
+
+.badges {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.badge:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.badge strong {
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+/* Hide right side on small screens */
+@media (max-width: 960px) {
+  .auth-right {
+    display: none;
+  }
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Animations */
+@keyframes slideRightFade {
+  0% { opacity: 0; transform: translateX(-30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+}
+
+@keyframes shine {
+  100% { left: 200%; }
+}
