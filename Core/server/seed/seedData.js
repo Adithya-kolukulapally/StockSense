@@ -39,21 +39,18 @@ const seed = async () => {
         ]);
         console.log('🧹 Cleared existing data');
 
-        // 1. Users
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash('Password123!', salt);
-
+        // 1. Users (password will be hashed once by User.js pre-save hook)
         const managerUser = await User.create({
             name: 'Adithya Kolukulapally',
             email: 'adithya@stocksense.io',
-            password: hashedPassword,
+            password: 'Password123!',
             role: 'inventory_manager'
         });
 
         const staffUser = await User.create({
             name: 'Warehouse Operator',
             email: 'staff@stocksense.io',
-            password: hashedPassword,
+            password: 'Password123!',
             role: 'warehouse_staff'
         });
 

@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
 const protect = async (req, res, next) => {
@@ -9,14 +10,25 @@ const protect = async (req, res, next) => {
             token = req.headers.authorization.split(' ')[1];
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'stocksense_jwt_secret_key_2026_secure');
 
-            // Find user if available in DB
-            const user = await User.findById(decoded.userId || decoded.id).select('-password');
+            const targetId = decoded.userId || decoded.id;
+            let user = null;
+
+            // Find user if valid ObjectId and DB is connected
+            if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(targetId)) {
+                try {
+                    user = await User.findById(targetId).select('-password');
+                } catch (e) {
+                    // ignore cast errors
+                }
+            }
+
             if (user) {
                 req.user = user;
             } else {
-                // If user document isn't in this DB instance yet, construct from token payload
+                // If user document isn't in DB, construct from token payload
                 req.user = {
-                    _id: decoded.userId || decoded.id || '660000000000000000000001',
+                    _id: targetId || '660000000000000000000001',
+                    id: targetId || '660000000000000000000001',
                     name: decoded.name || 'StockSense Operator',
                     email: decoded.email || 'operator@stocksense.io',
                     role: decoded.role || 'inventory_manager'
@@ -25,6 +37,7 @@ const protect = async (req, res, next) => {
 
             return next();
         } catch (error) {
+            console.error('JWT protect error:', error.message);
             return res.status(401).json({
                 success: false,
                 message: 'Invalid or expired authorization token',

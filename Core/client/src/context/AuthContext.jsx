@@ -46,9 +46,6 @@ export const AuthProvider = ({ children }) => {
         setLoading(true);
         try {
             const res = await authService.signup(userData);
-            if (res.success && res.user) {
-                setUser(res.user);
-            }
             return res;
         } finally {
             setLoading(false);

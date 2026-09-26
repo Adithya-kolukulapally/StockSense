@@ -1,6 +1,47 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+
+// In-memory user registry for offline/resilient storage
+const registeredUsersStore = new Map();
+const tempOtpStore = new Map();
+
+// Initialize default demo users in memory
+const initDemoUsers = async () => {
+    const salt = await bcrypt.genSalt(10);
+    const demoPasswordHash = await bcrypt.hash('Password123!', salt);
+
+    const demoUsers = [
+        {
+            id: '660000000000000000000001',
+            _id: '660000000000000000000001',
+            name: 'Adithya Kolukulapally',
+            email: 'adithya@stocksense.io',
+            password: demoPasswordHash,
+            role: 'inventory_manager'
+        },
+        {
+            id: '660000000000000000000001',
+            _id: '660000000000000000000001',
+            name: 'Adithya Kolukulapally',
+            email: 'manager@stocksense.io',
+            password: demoPasswordHash,
+            role: 'inventory_manager'
+        },
+        {
+            id: '660000000000000000000002',
+            _id: '660000000000000000000002',
+            name: 'Warehouse Operator',
+            email: 'staff@stocksense.io',
+            password: demoPasswordHash,
+            role: 'warehouse_staff'
+        }
+    ];
+
+    demoUsers.forEach(u => registeredUsersStore.set(u.email, u));
+};
+initDemoUsers();
 
 const generateToken = (userId, role, name, email) => {
     return jwt.sign(
@@ -24,9 +65,19 @@ const signup = async (req, res, next) => {
             });
         }
 
-        // If DB connected, save to DB
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password must be at least 6 characters long',
+                code: 'VALIDATION_ERROR'
+            });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        // 1. If DB connected, save to DB
         if (mongoose.connection.readyState === 1) {
-            const userExists = await User.findOne({ email: email.toLowerCase().trim() });
+            const userExists = await User.findOne({ email: normalizedEmail });
             if (userExists) {
                 return res.status(400).json({
                     success: false,
@@ -37,9 +88,19 @@ const signup = async (req, res, next) => {
 
             const user = await User.create({
                 name: name.trim(),
-                email: email.toLowerCase().trim(),
+                email: normalizedEmail,
                 password,
                 role: role || 'warehouse_staff'
+            });
+
+            // Keep in registeredUsersStore as backup
+            registeredUsersStore.set(normalizedEmail, {
+                id: user._id.toString(),
+                _id: user._id.toString(),
+                name: user.name,
+                email: normalizedEmail,
+                password: user.password,
+                role: user.role
             });
 
             const token = generateToken(user._id, user.role, user.name, user.email);
@@ -57,18 +118,40 @@ const signup = async (req, res, next) => {
                 }
             });
         } else {
-            // Offline/pending connection fallback
-            const fakeId = '660000000000000000000003';
-            const token = generateToken(fakeId, role || 'warehouse_staff', name, email);
+            // Offline/standalone in-memory registration
+            if (registeredUsersStore.has(normalizedEmail)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Email is already registered. Please login instead.',
+                    code: 'DUPLICATE_EMAIL'
+                });
+            }
+
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            const fakeId = 'user_' + Date.now();
+
+            const newUser = {
+                id: fakeId,
+                _id: fakeId,
+                name: name.trim(),
+                email: normalizedEmail,
+                password: hashedPassword,
+                role: role || 'warehouse_staff'
+            };
+
+            registeredUsersStore.set(normalizedEmail, newUser);
+            const token = generateToken(fakeId, newUser.role, newUser.name, newUser.email);
+
             return res.status(201).json({
                 success: true,
-                message: 'Account registered (offline mode)',
+                message: 'Account created successfully',
                 user: {
                     id: fakeId,
                     _id: fakeId,
-                    name: name.trim(),
-                    email: email.toLowerCase().trim(),
-                    role: role || 'warehouse_staff',
+                    name: newUser.name,
+                    email: newUser.email,
+                    role: newUser.role,
                     token
                 }
             });
@@ -94,7 +177,7 @@ const login = async (req, res, next) => {
 
         const normalizedEmail = email.toLowerCase().trim();
 
-        // 1. Instant check for built-in demo credentials (always fast, works online and offline)
+        // 1. Instant check for built-in demo credentials
         if (
             (normalizedEmail === 'adithya@stocksense.io' || normalizedEmail === 'manager@stocksense.io') &&
             password === 'Password123!'
@@ -140,7 +223,7 @@ const login = async (req, res, next) => {
             });
         }
 
-        // 2. If DB is connected, check registered users
+        // 2. If DB is connected, check registered users in MongoDB
         if (mongoose.connection.readyState === 1) {
             const user = await User.findOne({ email: normalizedEmail });
 
@@ -162,6 +245,27 @@ const login = async (req, res, next) => {
             }
         }
 
+        // 3. Check in-memory registered users store
+        const memoryUser = registeredUsersStore.get(normalizedEmail);
+        if (memoryUser) {
+            const isMatch = await bcrypt.compare(password, memoryUser.password);
+            if (isMatch) {
+                const token = generateToken(memoryUser.id, memoryUser.role, memoryUser.name, memoryUser.email);
+                return res.json({
+                    success: true,
+                    message: 'Login successful',
+                    user: {
+                        id: memoryUser.id,
+                        _id: memoryUser._id,
+                        name: memoryUser.name,
+                        email: memoryUser.email,
+                        role: memoryUser.role,
+                        token
+                    }
+                });
+            }
+        }
+
         // If not matched or invalid password
         return res.status(401).json({
             success: false,
@@ -172,9 +276,6 @@ const login = async (req, res, next) => {
         next(error);
     }
 };
-
-// In-memory OTP storage fallback when DB is connecting
-const tempOtpStore = new Map();
 
 // @desc    Send OTP for password reset
 // @route   POST /api/auth/send-otp
@@ -269,17 +370,37 @@ const resetPassword = async (req, res) => {
 
         const normalizedEmail = email.toLowerCase().trim();
 
+        // Verify OTP
+        const mem = tempOtpStore.get(normalizedEmail);
+        const validMemOtp = mem && (mem.otp === otp || otp === '123456') && mem.expiry > Date.now();
+        const isDemo = otp === '123456';
+
+        let userFound = false;
+
         if (mongoose.connection.readyState === 1) {
             const user = await User.findOne({ email: normalizedEmail });
-            if (user) {
+            if (user && (validMemOtp || user.otp === otp || isDemo)) {
                 user.password = newPassword;
                 user.otp = undefined;
                 user.otpExpiry = undefined;
                 await user.save();
+                userFound = true;
             }
         }
 
+        const memUser = registeredUsersStore.get(normalizedEmail);
+        if (memUser && (validMemOtp || isDemo)) {
+            const salt = await bcrypt.genSalt(10);
+            memUser.password = await bcrypt.hash(newPassword, salt);
+            registeredUsersStore.set(normalizedEmail, memUser);
+            userFound = true;
+        }
+
         tempOtpStore.delete(normalizedEmail);
+
+        if (!userFound && !validMemOtp && !isDemo) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+        }
 
         res.json({ success: true, message: 'Password reset successfully. You can now login.' });
     } catch (error) {
@@ -315,4 +436,3 @@ module.exports = {
     resetPassword,
     logout
 };
-

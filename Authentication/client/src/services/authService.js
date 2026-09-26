@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/auth/';
+const API_URL = '/api/auth/';
 
 const signup = async (userData) => {
     const response = await axios.post(API_URL + 'signup', userData);
@@ -17,8 +17,12 @@ const login = async (userData) => {
 
 const logout = async () => {
     localStorage.removeItem('user');
-    const response = await axios.post(API_URL + 'logout');
-    return response.data;
+    try {
+        const response = await axios.post(API_URL + 'logout');
+        return response.data;
+    } catch (e) {
+        return { success: true };
+    }
 };
 
 const getCurrentUser = async () => {

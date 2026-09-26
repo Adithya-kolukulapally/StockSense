@@ -111,62 +111,81 @@ const Login = () => {
                         </button>
                     </form>
 
-                    {/* Quick 1-Click Demo Login options */}
-                    <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-gray)', textAlign: 'center', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                            Instant Demo Login:
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    {/* Compact 1-Click Demo Credentials Strip */}
+                    <div className="demo-strip">
+                        <span className="demo-strip-label">Quick Demo:</span>
+                        <div className="demo-chip-group">
                             <button 
                                 type="button"
                                 onClick={() => handleQuickDemo('inventory_manager')}
-                                className="btn btn-secondary btn-sm"
+                                className="demo-chip"
                                 id="btn-demo-manager"
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px 10px' }}
                             >
-                                <ShieldCheck size={14} color="var(--primary)" />
-                                <span>Manager Role</span>
+                                👔 Manager
                             </button>
-
                             <button 
                                 type="button"
                                 onClick={() => handleQuickDemo('warehouse_staff')}
-                                className="btn btn-secondary btn-sm"
+                                className="demo-chip"
                                 id="btn-demo-staff"
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px 10px' }}
                             >
-                                <UserCheck size={14} color="var(--success)" />
-                                <span>Staff Role</span>
+                                📦 Staff
                             </button>
                         </div>
                     </div>
 
                     <div className="auth-footer-text">
-                        Don't have an account? <br/>
-                        <Link to="/signup" style={{ display: 'inline-block', marginTop: '8px' }}>Create Account</Link>
+                        Don't have an account? <Link to="/signup">Create Account</Link>
                     </div>
 
                     <div className="auth-secure-text">
-                        Secure access powered by StockSense
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0110 0v4"></path>
+                        </svg>
+                        <span>Encrypted Session • StockSense v2.4</span>
                     </div>
                 </div>
             </div>
 
-            {/* Right Side - Exactly matching screenshot */}
+            {/* Right Side: Visual Brand & Live Telemetry */}
             <div className="auth-right">
                 <div className="auth-right-content">
                     <Logo />
-                    <h2 className="auth-right-heading">Bring clarity to every inventory decision.</h2>
+                    <h2 className="auth-right-heading">Inventory intelligence, in sync.</h2>
                     <p className="auth-right-subheading">
-                        Turn your team's scattered data into an intelligent, searchable memory.
+                        Track stock levels, multi-facility transfers, and warehouse audit trails in one unified console.
                     </p>
-                    
-                    <div className="badges">
+
+                    {/* Live Telemetry Preview Card */}
+                    <div className="live-telemetry-card">
+                        <div className="telemetry-row">
+                            <span className="telemetry-label">Network Status</span>
+                            <span className="telemetry-value">
+                                <span className="pulse-dot"></span>
+                                Live Sync Active
+                            </span>
+                        </div>
+                        <div className="telemetry-row">
+                            <span className="telemetry-label">Active Warehouses</span>
+                            <span className="telemetry-value">4 Facilities</span>
+                        </div>
+                        <div className="telemetry-row">
+                            <span className="telemetry-label">Tracked SKUs</span>
+                            <span className="telemetry-value">34,920 Units</span>
+                        </div>
+                        <div className="telemetry-row">
+                            <span className="telemetry-label">Security Protocol</span>
+                            <span className="telemetry-value" style={{ color: '#a7f3d0' }}>JWT • RBAC Enabled</span>
+                        </div>
+                    </div>
+
+                    <div className="badge-row">
                         <div className="badge-pill">
-                            <strong>Live</strong> Node.js backend
+                            <strong>Audit</strong> Real-Time Ledger
                         </div>
                         <div className="badge-pill">
-                            <strong>Secure</strong> JWT auth
+                            <strong>Multi-Site</strong> Stock Sync
                         </div>
                     </div>
                 </div>

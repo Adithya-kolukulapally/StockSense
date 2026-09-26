@@ -1,16 +1,22 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+    const uri = process.env.MONGO_URI;
+    if (!uri) {
+        console.warn('⚠️ MONGO_URI is not defined. Authentication server running with in-memory persistence.');
+        return false;
+    }
+
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI, {
-            // These options are no longer necessary in Mongoose 6+ but harmless
-            // useNewUrlParser: true,
-            // useUnifiedTopology: true,
+        const conn = await mongoose.connect(uri, {
+            serverSelectionTimeoutMS: 5000,
         });
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+        return true;
     } catch (error) {
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
+        console.warn(`⚠️ MongoDB Connection Error: ${error.message}`);
+        console.warn('Authentication server operating in resilient in-memory mode.');
+        return false;
     }
 };
 
